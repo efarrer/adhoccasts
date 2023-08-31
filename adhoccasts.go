@@ -193,6 +193,7 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 			w.Header().Set("Content-Type", "application/rss+xml")
 
 			encoder := xml.NewEncoder(w)
+			encoder.Indent("", "  ")
 			encoder.Encode(rss)
 			return
 		}
