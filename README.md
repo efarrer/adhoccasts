@@ -18,8 +18,8 @@ laptop and turn them into a podcast that can be subscribed to on my phone.
 -----
 Usage
 
-The program takes two arguments. The first -url is the base url to publish the
-podcasts under. The hostname should be the hostname of your machine. The -dir is
+The program takes three arguments. The first -url is the public base url to publish the
+podcasts under. The hostname should be the hostname of your machine. The -port is the TCP port to listen on. The -dir is
 the root directory where the application will look for podcast directories.
 
 ./adhoccasts -dir /Users/efarrer/Podcasts/ -url http://adhoccasts.duckdns.org:8080

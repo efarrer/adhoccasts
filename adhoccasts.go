@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -139,52 +138,54 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 				w.Write([]byte("No such podcast."))
 				fmt.Println("Not Found")
 				return
-			} else if !isDir {
+			}
+			if !isDir {
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte("Not a podcast."))
 				fmt.Println("Not Authorized")
 				return
-			} else {
-				title := dirToTitle(podcastDir)
-				description := dirToDescription(podcastDir)
+			}
+			title := dirToTitle(podcastDir)
+			description := dirToDescription(podcastDir)
 
-				fileInfos, err := ioutil.ReadDir(podcastDir)
-				if err != nil {
-					w.WriteHeader(http.StatusUnauthorized)
-					w.Write([]byte("Can't read directory."))
-					fmt.Println("Not Authorized (bad directory)")
-					return
-				}
-
-				rss := Rss{
-					xml.Name{"", ""},
-					"2.0",
-					Channel{title, description, time.Now().Format(FORMAT), nil},
-				}
-
-				items := []Item{}
-				for _, fileInfo := range fileInfos {
-					name := strings.TrimSuffix(fileInfo.Name(), filepath.Ext(fileInfo.Name()))
-					name = strings.Replace(name, "_", " ", -1)
-					url := baseUrl + "/" + path.Base(podcastDir) + "/" + fileInfo.Name()
-					items = append(items, Item{
-						name,
-						name,
-						Enclosure{
-							url,
-							fileInfo.Size(),
-							"audio/mpeg",
-						},
-						Guid{
-							true,
-							url,
-						}})
-				}
-				rss.Channel.Items = items
-				encoder := xml.NewEncoder(w)
-				encoder.Encode(rss)
+			fileInfos, err := ioutil.ReadDir(podcastDir)
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("Can't read directory."))
+				fmt.Println("Not Authorized (bad directory)")
 				return
 			}
+
+			rss := Rss{
+				xml.Name{"", ""},
+				"2.0",
+				Channel{title, description, time.Now().Format(FORMAT), nil},
+			}
+
+			items := []Item{}
+			for _, fileInfo := range fileInfos {
+				name := strings.TrimSuffix(fileInfo.Name(), filepath.Ext(fileInfo.Name()))
+				name = strings.Replace(name, "_", " ", -1)
+				url := baseUrl + "/" + path.Base(podcastDir) + "/" + fileInfo.Name()
+				items = append(items, Item{
+					name,
+					name,
+					Enclosure{
+						url,
+						fileInfo.Size(),
+						"audio/mpeg",
+					},
+					Guid{
+						true,
+						url,
+					}})
+			}
+			rss.Channel.Items = items
+			w.Header().Set("Content-Type", "application/rss+xml")
+
+			encoder := xml.NewEncoder(w)
+			encoder.Encode(rss)
+			return
 		} else {
 			fmt.Printf("Serving up %s\n", cleanPath)
 			// A podcast mp3 file
@@ -217,23 +218,9 @@ func validateDir(dir string) (string, error) {
 	return cleanDir, nil
 }
 
-func getAddress(urlStr string) (string, error) {
-
-	url, err := url.Parse(urlStr)
-	if err != nil {
-		return "", err
-	}
-	address := ":8080"
-	host_address := strings.Split(url.Host, ":")
-	if len(host_address) > 1 {
-		address = ":" + host_address[1]
-	}
-
-	return address, nil
-}
-
 func main() {
 	urlStr := flag.String("url", "http://localhost:8080", "The base url for the podcasts")
+	port := flag.Int("port", 8080, "The port to listen on")
 	dir := flag.String("dir", "./", "The directory where the adhoc podcasts are stored")
 	flag.Parse()
 
@@ -242,12 +229,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	address, err := getAddress(*urlStr)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	fmt.Printf("Publishing directories under %s as podcasts on %s\n", *dir, *urlStr)
 	http.HandleFunc("/", createCastHandler(*urlStr, cleanDir))
-	log.Fatal(http.ListenAndServe(address, nil))
+
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
