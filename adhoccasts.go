@@ -52,6 +52,7 @@ type Rss struct {
 
 type Channel struct {
 	Title         string `xml:"title"`
+	Link          string `xml:"link"`
 	Description   string `xml:"description"`
 	LastBuildDate string `xml:"lastBuildDate"`
 	Items         []Item `xml:"item"`
@@ -161,7 +162,13 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 			rss := Rss{
 				xml.Name{"", ""},
 				"2.0",
-				Channel{title, description, time.Now().Format(FORMAT), nil},
+				Channel{
+					Title:         title,
+					Link:          baseUrl,
+					Description:   description,
+					LastBuildDate: time.Now().Format(FORMAT),
+					Items:         nil,
+				},
 			}
 
 			items := []Item{}
