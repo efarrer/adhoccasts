@@ -91,7 +91,7 @@ func dirToDescription(dir string) string {
 }
 
 func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter, *http.Request) {
-	theHandler := func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Get the full clean path
 		cleanPath, err := validatePath(path.Join(rootDir, r.URL.Path))
 		if err != nil {
@@ -129,7 +129,9 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 				return
 			}
 			templ.Execute(w, &p)
-		} else if strings.HasSuffix(cleanPath, ".xml") {
+			return
+		}
+		if strings.HasSuffix(cleanPath, ".xml") {
 			fmt.Printf("Generating %s\n", cleanPath)
 			podcastDir := strings.TrimSuffix(cleanPath, filepath.Ext(cleanPath))
 			isDir, err := isDirectory(podcastDir)
@@ -186,13 +188,12 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 			encoder := xml.NewEncoder(w)
 			encoder.Encode(rss)
 			return
-		} else {
-			fmt.Printf("Serving up %s\n", cleanPath)
-			// A podcast mp3 file
-			http.ServeFile(w, r, cleanPath)
 		}
+		fmt.Printf("Serving up %s\n", cleanPath)
+		// A podcast mp3 file
+		http.ServeFile(w, r, cleanPath)
+		return
 	}
-	return theHandler
 }
 
 func validatePath(path string) (string, error) {
