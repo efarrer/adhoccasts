@@ -61,6 +61,7 @@ type Channel struct {
 type Item struct {
 	Title       string    `xml:"title"`
 	Description string    `xml:"description"`
+	PubDate     string    `xml:"pubDate"`
 	Enclosure   Enclosure `xml:"enclosure"`
 	Guid        Guid      `xml:"guid"`
 }
@@ -177,14 +178,15 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 				name = strings.Replace(name, "_", " ", -1)
 				url := baseUrl + "/" + path.Base(podcastDir) + "/" + fileInfo.Name()
 				items = append(items, Item{
-					name,
-					name,
-					Enclosure{
+					Title:       name,
+					Description: name,
+					PubDate:     fileInfo.ModTime().Format(time.RFC1123Z),
+					Enclosure: Enclosure{
 						url,
 						fileInfo.Size(),
 						"audio/mpeg",
 					},
-					Guid{
+					Guid: Guid{
 						true,
 						url,
 					}})
