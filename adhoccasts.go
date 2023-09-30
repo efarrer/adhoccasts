@@ -184,7 +184,7 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 					Enclosure: Enclosure{
 						url,
 						fileInfo.Size(),
-						"audio/mpeg",
+						contentType(fileInfo.Name()),
 					},
 					Guid: Guid{
 						true,
@@ -203,6 +203,17 @@ func createCastHandler(baseUrl string, rootDir string) func(http.ResponseWriter,
 		// A podcast mp3 file
 		http.ServeFile(w, r, cleanPath)
 		return
+	}
+}
+
+func contentType(name string) string {
+	switch path.Ext(name) {
+	case ".mp3":
+		return "audio/mpeg"
+	case ".mp4":
+		return "video/mp4"
+	default:
+		return "audio/mpeg"
 	}
 }
 
@@ -240,7 +251,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Publishing directories under %s as podcasts on %s\n", *dir, *urlStr)
+	fmt.Printf("Publishing directories under %s as podcasts on %s. Listening on :%d\n", *dir, *urlStr, *port)
 	http.HandleFunc("/", createCastHandler(*urlStr, cleanDir))
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
