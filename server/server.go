@@ -39,10 +39,12 @@ func NewServeMux(rootUrl, rootDir string, fs Filesystemer) (*ServeMux, error) {
 func (mux *ServeMux) ListenAndServe(addr string) error {
 	indexer := handler.NewIndexer(mux.rootUrl, mux.rootDir, mux.fs)
 	rsser := handler.NewRsser(mux.rootUrl, mux.rootDir, mux.fs)
+	logger := handler.NewLogger()
 
 	h := http.FileServer(http.Dir(mux.rootDir))
 	h = indexer.Wrap("/", h)
 	h = rsser.Wrap(h)
+	h = logger.Wrap(h)
 	mux.HttpServeMux.Handle("/", h)
 
 	return http.ListenAndServe(addr, mux.HttpServeMux)
