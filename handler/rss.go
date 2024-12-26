@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/efarrer/adhoccasts/filesystem"
+	"github.com/efarrer/adhoccasts/filetypes"
 )
 
 const (
@@ -87,6 +88,9 @@ func (rsser Rsser) Render(podcastDir string) (Rss, error) {
 	if err != nil {
 		return rss, fmt.Errorf("list files for %s, %w", fullDir, err)
 	}
+
+	// Filter out non-supported file types
+	files = filetypes.FilterEpisodes(files)
 
 	items := make([]Item, 0, len(files))
 	for _, file := range files {
