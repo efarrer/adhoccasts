@@ -21,6 +21,24 @@ var episodeMediaExtensions map[string]struct{} = map[string]struct{}{
 	".m4v":  {},
 }
 
+var podcastTitleExtensions map[string]struct{} = map[string]struct{}{
+	".png":  {},
+	".jpeg": {},
+	".jpg":  {},
+}
+
+func FilterArtwork(files []filesystem.File) []filesystem.File {
+	filtered := make([]filesystem.File, 0, len(files))
+	for _, file := range files {
+		extension := filepath.Ext(file.Name)
+		if _, ok := podcastTitleExtensions[extension]; ok {
+			filtered = append(filtered, file)
+		}
+	}
+
+	return filtered
+}
+
 func FilterEpisodes(files []filesystem.File) []filesystem.File {
 	filtered := make([]filesystem.File, 0, len(files))
 	for _, file := range files {

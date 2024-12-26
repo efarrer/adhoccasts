@@ -20,6 +20,12 @@ func (fl fileLister) IsDirectory(string) (bool, error) {
 	return true, nil
 }
 
+func TestDirToSecription(t *testing.T) {
+	require.Equal(t, "Thing", handler.DirToDescription("Some__Thing"))
+	require.Equal(t, "thing", handler.DirToDescription("Some__thing"))
+	require.Equal(t, "Some Thing", handler.DirToDescription("Some Thing"))
+}
+
 func TestRsser_HandlesFunkyNames(t *testing.T) {
 	rsser := handler.NewRsser(
 		"http://localhost/",
@@ -47,8 +53,9 @@ func TestRsser_HandlesFunkyNames(t *testing.T) {
 		XMLName: xml.Name{"", ""},
 		Version: "2.0",
 		Channel: handler.Channel{
-			Title: "this dir has spaces",
-			Link:  "http://localhost/",
+			Title:       "this dir has spaces",
+			Link:        "http://localhost/",
+			Description: "this dir has spaces",
 			Items: []handler.Item{
 				{
 					Title:       "foo",

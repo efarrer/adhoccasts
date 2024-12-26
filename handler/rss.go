@@ -46,6 +46,7 @@ type Rss struct {
 type Channel struct {
 	Title         string `xml:"title"`
 	Link          string `xml:"link"`
+	Image         string `xml:"itunes:image"`
 	Description   string `xml:"description"`
 	LastBuildDate string `xml:"lastBuildDate"`
 	Items         []Item `xml:"item"`
@@ -71,29 +72,43 @@ type Guid struct {
 }
 
 func (rsser Rsser) Render(podcastDir string) (Rss, error) {
+
+	fullDir := path.Join(rsser.rootDir, podcastDir)
+	files, err := rsser.fs.ListFiles(fullDir)
+	if err != nil {
+		return Rss{}, fmt.Errorf("list files for %s, %w", fullDir, err)
+	}
+
+	// Find a title image
+	image := ""
+	artwork := filetypes.FilterArtwork(files)
+	if len(artwork) > 0 {
+		parsedUrl, err := url.Parse(rsser.rootUrl)
+		if err != nil {
+			return Rss{}, fmt.Errorf("parsing url for %s, %w", podcastDir, err)
+		}
+		parsedUrl.Path = "/" + path.Base(podcastDir) + "/" + artwork[0].Name
+		image = parsedUrl.String()
+	}
+
 	rss := Rss{
 		XMLName: xml.Name{"", ""},
 		Version: "2.0",
 		Channel: Channel{
 			Title:         dirToTitle(podcastDir),
 			Link:          rsser.rootUrl,
-			Description:   dirToDescription(podcastDir),
+			Image:         image,
+			Description:   DirToDescription(podcastDir),
 			LastBuildDate: time.Now().Format(timeFormat),
 			Items:         nil,
 		},
 	}
 
-	fullDir := path.Join(rsser.rootDir, podcastDir)
-	files, err := rsser.fs.ListFiles(fullDir)
-	if err != nil {
-		return rss, fmt.Errorf("list files for %s, %w", fullDir, err)
-	}
+	// Filter out non-supported episode types
+	episodes := filetypes.FilterEpisodes(files)
 
-	// Filter out non-supported file types
-	files = filetypes.FilterEpisodes(files)
-
-	items := make([]Item, 0, len(files))
-	for _, file := range files {
+	items := make([]Item, 0, len(episodes))
+	for _, file := range episodes {
 		title := nameToTitle(file.Name)
 		parsedUrl, err := url.Parse(rsser.rootUrl)
 		if err != nil {
@@ -164,12 +179,13 @@ func (rsser Rsser) Wrap(handler http.Handler) http.Handler {
 	})
 }
 
-func dirToDescription(dir string) string {
+func DirToDescription(dir string) string {
 	title__description := strings.Split(filepath.Base(dir), "__")
 	description := ""
-	if len(title__description) > 1 {
-		description = title__description[1]
+	if len(title__description) == 1 {
+		return dir
 	}
+	description = title__description[1]
 	return strings.Replace(description, "_", " ", -1)
 }
 
