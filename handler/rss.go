@@ -43,10 +43,14 @@ type Rss struct {
 	Channel Channel  `xml:"channel"`
 }
 
+type Image struct {
+	Url string `xml:"url"`
+}
+
 type Channel struct {
 	Title         string `xml:"title"`
 	Link          string `xml:"link"`
-	Image         string `xml:"itunes:image"`
+	Image         Image  `xml:"image"`
 	Description   string `xml:"description"`
 	LastBuildDate string `xml:"lastBuildDate"`
 	Items         []Item `xml:"item"`
@@ -97,7 +101,7 @@ func (rsser Rsser) Render(podcastDir string) (Rss, error) {
 		Channel: Channel{
 			Title:         dirToTitle(podcastDir),
 			Link:          rsser.rootUrl,
-			Image:         image,
+			Image:         Image{Url: image},
 			Description:   DirToDescription(podcastDir),
 			LastBuildDate: time.Now().Format(timeFormat),
 			Items:         nil,
