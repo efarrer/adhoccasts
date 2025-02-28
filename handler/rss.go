@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -82,6 +83,10 @@ func (rsser Rsser) Render(podcastDir string) (Rss, error) {
 	if err != nil {
 		return Rss{}, fmt.Errorf("list files for %s, %w", fullDir, err)
 	}
+
+	slices.SortFunc(files, func(a, b filesystem.File) int {
+		return b.ModTime.Compare(a.ModTime)
+	})
 
 	// Find a title image
 	image := ""
