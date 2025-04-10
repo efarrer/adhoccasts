@@ -1,19 +1,19 @@
 Ad-hoc Casts
 ============
 
-A simple application for creating ad-hoc podcasts from directories of mp3s.
+A simple application for creating ad-hoc podcasts from directories of media.
 
 ------------------
 About Ad-hoc Casts
 
-Ad-hoc Casts is an easy way to generate ad-hoc podcasts from directories of mp3s.
-I often find talks on the internet that provide an mp3. I want to listen to them
-on my phone but listening to individual mp3's from the internet is much more
+Ad-hoc Casts is an easy way to generate ad-hoc podcasts from directories of media.
+I often find talks on the internet that provide media. I want to listen to them
+on my phone but listening to individual media files from the internet is much more
 cumbersome than listening to a podcast. For example my podcast app can play the
 audio at a higher speed, automatically delete audio when it's been played,
 download the file when I'm not on a cellular connection, queue up multiple files
-to play etc. With Ad-hoc Casts. I can quickly download one or more mp3's to my
-laptop and turn them into a podcast that can be subscribed to on my phone.
+to play etc. With Ad-hoc Casts. I can quickly download one or more media files to my
+raspberry pi and turn them into a podcast that can be subscribed to on my phone.
 
 -----
 Usage
@@ -26,7 +26,7 @@ the root directory where the application will look for podcast directories.
 
 ------------------------------------
 Directory layout for ad-hoc podcasts
-Each directory is it's own podcast and any mp3s under that directory will be
+Each directory is it's own podcast and any media under that directory will be
 treated as episodes. The title of the podcast is the portion of the directory
 name before a double underscore. . The description is the portion after the
 double underscore. Any single underscores will be converted to spaces. So a
