@@ -19,6 +19,7 @@ var episodeMediaExtensions map[string]struct{} = map[string]struct{}{
 	".m4p":  {},
 	".mov":  {},
 	".m4v":  {},
+	".feed": {}, // This is a special case used for rss feeds only
 }
 
 var podcastTitleExtensions map[string]struct{} = map[string]struct{}{

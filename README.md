@@ -35,6 +35,12 @@ Could be created by the following directory name:
 "Old_Yeller__A_sad_podcast_about_a_dog"
 
 ------------
+RSS feeds
+It can also be used to create a simple RSS feed. This can be useful for sending notifications to your phone. Instead of
+adding media files just create a file with the .feed extension. The name is used for the title (as with a podcast) and
+the file contexts will be used for the description.
+
+------------
 Code Quality
 
 This is a quick and dirty program that's currently at the "runs on my machine"

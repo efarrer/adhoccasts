@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -137,6 +138,19 @@ func (rsser Rsser) Render(podcastDir string) (Rss, error) {
 				IsPermaLink: true,
 				Value:       parsedUrl.String(),
 			},
+		}
+
+		// If we have a pure rss feed (not a podcast)
+		if filepath.Ext(file.Name) == ".feed" {
+			fullPath := path.Join(fullDir, file.Name)
+			bytes, err := os.ReadFile(fullPath)
+			if err != nil {
+				return rss, fmt.Errorf("reading description for feed %s, %w", fullPath, err)
+			}
+
+			// No enclosure for pure feeds
+			item.Enclosure = Enclosure{}
+			item.Description = string(bytes)
 		}
 		items = append(items, item)
 	}
